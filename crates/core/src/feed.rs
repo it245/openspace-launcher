@@ -23,7 +23,7 @@ use crate::time::parse_rfc3339;
 use crate::version;
 
 /// Where the feed lives.
-pub const FEED_URL: &str = "https://openspace-apps.github.io/openspace-feed/release_info.json";
+pub const FEED_URL: &str = "https://it245.github.io/openspace-feed/release_info.json";
 
 /// An app's entry is trusted for this long after storyteller-web fetched it.
 pub const MAX_AGE: i64 = 24 * 3600;

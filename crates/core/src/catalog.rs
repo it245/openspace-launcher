@@ -79,17 +79,17 @@ pub const SUITE: [CraftApp; 1] = [
         "OpenImpose",
         "Imposition and ganging",
         [[0x15, 0x8f, 0xad], [0x0b, 0x5f, 0x74], [0x5a, 0xc8, 0xe0]],
-        "openspace-apps/openimpose",
+        "it245/openimpose",
     ),
 ];
 
 /// OpenSpace's website.
-pub const WEBSITE_URL: &str = "https://openspace-apps.github.io";
+pub const WEBSITE_URL: &str = "https://it245.github.io";
 /// The GitHub account every Craft App's repository lives under: the only one the launcher
 /// installs from, whatever the release feed says.
-pub const GITHUB_OWNER: &str = "openspace-apps";
+pub const GITHUB_OWNER: &str = "it245";
 /// OpenSpace on GitHub: every Craft App's source.
-pub const GITHUB_URL: &str = "https://github.com/openspace-apps";
+pub const GITHUB_URL: &str = "https://github.com/it245";
 /// OpenSpace's social accounts: (service, URL). Shown as small icons, less prominent than Discord.
 pub const SOCIAL: [(&str, &str); 0] = [];
 
@@ -106,11 +106,11 @@ pub const LAUNCHER: CraftApp = app(
     "OpenSpace",
     "Installs and updates the Craft App Suite",
     [[0x0b, 0x0b, 0x0c], [0x0b, 0x0b, 0x0c], [0xf2, 0xf1, 0xee]],
-    "openspace-apps/openspace-launcher",
+    "it245/openspace-launcher",
 );
 
 /// The launcher's own repo, checked so it can say when a newer launcher is out.
-pub const LAUNCHER_REPO: &str = "openspace-apps/openspace-launcher";
+pub const LAUNCHER_REPO: &str = "it245/openspace-launcher";
 /// The launcher's own asset stem.
 pub const LAUNCHER_ID: &str = "openspace-launcher";
 
