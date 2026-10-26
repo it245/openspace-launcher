@@ -597,7 +597,7 @@ pub fn more_menu<R>(ui: &mut Ui, app_name: &str, add_contents: impl FnOnce(&mut 
 pub fn social_icons(ui: &mut Ui, size: f32) {
     let links: Vec<IconLink> = artcraft_launcher_core::catalog::SOCIAL
         .iter()
-        .map(|(name, url)| IconLink { name, label: (*name).to_string(), tip: crate::i18n::fmt(tl!("ArtCraft on {name}"), &[("name", name)]), url })
+        .map(|(name, url)| IconLink { name, label: (*name).to_string(), tip: crate::i18n::fmt(tl!("OpenSpace on {name}"), &[("name", name)]), url })
         .collect();
     icon_links(ui, size, &links);
 }

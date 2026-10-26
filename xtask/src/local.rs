@@ -32,6 +32,7 @@ const APPS: &[(&str, &str)] = &[
     ("deckcraft", "DeckCraft"),
     ("cadcraft", "CADCraft"),
     ("gridcraft", "GridCraft"),
+    ("openimpose", "OpenImpose"),
 ];
 
 const DEFAULT_PORT: u16 = 8787;

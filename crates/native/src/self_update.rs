@@ -1,4 +1,4 @@
-//! ArtCraft Launcher updating itself.
+//! OpenSpace updating itself.
 //!
 //! Delegated to [`craft_update::self_update`].
 

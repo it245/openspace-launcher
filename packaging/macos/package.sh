@@ -18,7 +18,7 @@ HERE="$ROOT/packaging/macos"
 
 # ---- app-specific values ----------------------------------------------------------------------
 PKG=artcraft-launcher          # cargo package and binary
-APP_NAME="ArtCraft Launcher"   # display name: bundle, executable, icon, DMG volume
+APP_NAME="OpenSpace"   # display name: bundle, executable, icon, DMG volume
 
 ARCH=universal
 SKIP_BUILD=0

@@ -40,7 +40,7 @@ use std::time::{Duration, Instant};
 
 use artcraft_launcher_core::version::{self, Version};
 
-const PORT: u16 = 47_413;
+const PORT: u16 = 47_714;
 /// What launchers before the version handshake send (and still the answer to an unknown peer).
 const SHOW: &[u8] = b"artcraft-launcher:show";
 /// `hello <version> <nonce>`: a second start introduces itself with its version and client nonce.
@@ -66,7 +66,7 @@ const MAX_GREETING: usize = 256;
 fn token() -> Option<String> {
     use std::io::Read;
     let dir =
-        dirs::data_local_dir()?.join(if cfg!(any(target_os = "macos", target_os = "windows")) { "ArtCraft Launcher" } else { "artcraft-launcher" });
+        dirs::data_local_dir()?.join(if cfg!(any(target_os = "macos", target_os = "windows")) { "OpenSpace" } else { "openspace" });
     let path = dir.join(".instance-token");
     if let Ok(mut f) = std::fs::File::open(&path) {
         let mut s = String::new();
@@ -166,7 +166,7 @@ pub fn claim(wake: Wake) -> Instance {
             Instance::Secondary
         }
         Ok(Answer::Legacy) => {
-            log::warn!("an older ArtCraft Launcher is running and can't be asked to quit; starting anyway");
+            log::warn!("an older OpenSpace is running and can't be asked to quit; starting anyway");
             Instance::Primary(channel().1)
         }
         // The port is taken by something else: run anyway rather than refuse to start.

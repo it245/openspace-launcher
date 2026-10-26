@@ -75,10 +75,12 @@ impl LauncherUi {
             if bar == TitleBar::MacOs {
                 ui.add_space(TRAFFIC_LIGHTS_W);
             }
-            // The ArtCraft wordmark exactly as supplied, in its own cell.
-            let logo = vec2(14.0 * crate::icons::ARTCRAFT_LOGO_ASPECT, 14.0);
-            let (cell, _) = ui.allocate_exact_size(vec2(logo.x + 40.0, h), Sense::hover());
-            egui::Image::new(crate::icons::artcraft_logo(t.dark)).alt_text(tl!("ArtCraft")).paint_at(ui, Rect::from_center_size(cell.center(), logo));
+            // OpenSpace wordmark, drawn as text so it needs no bundled logo asset.
+            let brand = "OpenSpace";
+            let font = egui::FontId::new(17.0, egui::FontFamily::Proportional);
+            let ink = if t.dark { egui::Color32::WHITE } else { egui::Color32::from_gray(20) };
+            let (cell, _) = ui.allocate_exact_size(vec2(124.0, h), Sense::hover());
+            ui.painter().text(cell.left_center() + vec2(16.0, 0.0), egui::Align2::LEFT_CENTER, brand, font, ink);
             ui.with_layout(egui::Layout::right_to_left(egui::Align::Center), |ui| {
                 if bar == TitleBar::Custom {
                     widgets::window_buttons(ui, h);
@@ -88,10 +90,10 @@ impl LauncherUi {
                 }
                 // The controls reserve their actual widths before the secondary text gets space.
                 ui.with_layout(egui::Layout::left_to_right(egui::Align::Center), |ui| {
-                    if ui.available_width() >= 17.0 + widgets::hud_galley(ui, tl!("Craft App Suite"), t.muted).size().x {
+                    if ui.available_width() >= 17.0 + widgets::hud_galley(ui, tl!("Print Suite"), t.muted).size().x {
                         widgets::rule(ui, h);
                         ui.add_space(16.0);
-                        widgets::hud(ui, tl!("Craft App Suite"), t.muted);
+                        widgets::hud(ui, tl!("Print Suite"), t.muted);
                     }
                 });
             });
@@ -117,7 +119,7 @@ impl LauncherUi {
         }
     }
 
-    /// A banner over the toolbar when a newer ArtCraft Launcher release is known: either the
+    /// A banner over the toolbar when a newer OpenSpace release is known: either the
     /// update-in-place controls, or a plain link when this build can't update itself.
     fn launcher_update_banner(&mut self, ui: &mut Ui, t: &Tokens, r: &artcraft_launcher_core::Release) {
         egui::Frame::new()
@@ -129,7 +131,7 @@ impl LauncherUi {
                     widgets::tag(ui, tl!("Update"), t.accent, Color32::WHITE);
                     ui.add_space(4.0);
                     ui.label(
-                        RichText::new(fmt(tl!("ArtCraft Launcher {version} is available."), &[("version", &r.version_label())]))
+                        RichText::new(fmt(tl!("OpenSpace {version} is available."), &[("version", &r.version_label())]))
                             .family(theme::medium())
                             .color(t.ink_strong),
                     );
@@ -352,14 +354,14 @@ impl LauncherUi {
             widgets::IconLink {
                 name: "Discord",
                 label: tl!("Discord").to_string(),
-                tip: tl!("Join the ArtCraft community on Discord").to_string(),
+                tip: tl!("Join the OpenSpace community on Discord").to_string(),
                 url: self.discord_url,
             },
         ];
         links.extend(SOCIAL.iter().map(|(name, url)| widgets::IconLink {
             name,
             label: (*name).to_string(),
-            tip: fmt(tl!("ArtCraft on {name}"), &[("name", name)]),
+            tip: fmt(tl!("OpenSpace on {name}"), &[("name", name)]),
             url,
         }));
         let icon = 13.0;
@@ -1158,7 +1160,7 @@ mod tests {
         Release {
             tag: "v0.4.1".into(),
             version: None,
-            name: "ArtCraft Launcher v0.4.1".into(),
+            name: "OpenSpace v0.4.1".into(),
             published_at: None,
             html_url: "https://github.com/storytold/craft-launcher/releases/tag/v0.4.1".into(),
             notes: String::new(),
