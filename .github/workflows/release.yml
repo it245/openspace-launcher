@@ -1,9 +1,9 @@
 name: release
 
-# Self-contained OpenSpace launcher release: builds the macOS (Apple Silicon)
-# and Windows artifacts and publishes them on a v* tag. Unsigned: macOS is
-# ad-hoc signed (Gatekeeper needs right-click > Open the first time), Windows
-# is a portable zip. No external (storytold) reusable workflows or secrets.
+# Self-contained OpenSpace launcher release: macOS (Apple Silicon) DMG,
+# Windows MSI and a Windows portable zip, published on a v* tag. Unsigned:
+# macOS is ad-hoc (Gatekeeper needs right-click > Open the first time), the
+# MSI/zip are unsigned. No external reusable workflows or secrets.
 
 on:
   push:
@@ -25,7 +25,7 @@ jobs:
       - name: Collect dmg
         run: |
           v=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
-          src=$(ls dist/*macos-aarch64.dmg 2>/dev/null || ls target/*/dist/*macos-aarch64.dmg 2>/dev/null | head -1)
+          src=$(ls dist/release/*macos-aarch64.dmg | head -1)
           out="openspace-launcher-$v-macos-arm64.dmg"
           cp "$src" "$out"
           shasum -a 256 "$out" > SHA256SUMS-launcher-macos.txt
@@ -36,7 +36,7 @@ jobs:
             openspace-launcher-*-macos-arm64.dmg
             SHA256SUMS-launcher-macos.txt
 
-  windows:
+  windows-zip:
     runs-on: windows-latest
     steps:
       - uses: actions/checkout@v4
@@ -49,10 +49,38 @@ jobs:
           $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.*)"' | Select-Object -First 1).Matches[0].Groups[1].Value
           $out = "openspace-launcher-$v-windows-x64-portable.zip"
           Compress-Archive -Path target/release/artcraft-launcher.exe -DestinationPath $out
-          ((Get-FileHash $out -Algorithm SHA256).Hash.ToLower() + "  " + $out) | Out-File -Encoding ascii SHA256SUMS-launcher-windows.txt
+          ((Get-FileHash $out -Algorithm SHA256).Hash.ToLower() + "  " + $out) | Out-File -Encoding ascii SHA256SUMS-launcher-windows-zip.txt
           Get-ChildItem $out
       - uses: softprops/action-gh-release@v2
         with:
           files: |
             openspace-launcher-*-windows-x64-portable.zip
-            SHA256SUMS-launcher-windows.txt
+            SHA256SUMS-launcher-windows-zip.txt
+
+  windows-msi:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Install WiX v5
+        shell: pwsh
+        run: |
+          dotnet tool install --global wix --version 5.0.2
+          wix extension add -g WixToolset.UI.wixext
+          wix extension add -g WixToolset.Util.wixext
+      - name: Build MSI (unsigned)
+        shell: pwsh
+        run: pwsh -File packaging/windows/package.ps1
+      - name: Collect msi
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.*)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $msi = Get-ChildItem dist/release/*windows-x64.msi | Select-Object -First 1
+          Copy-Item $msi.FullName "openspace-launcher-$v-windows-x64.msi"
+          ((Get-FileHash "openspace-launcher-$v-windows-x64.msi" -Algorithm SHA256).Hash.ToLower() + "  openspace-launcher-$v-windows-x64.msi") | Out-File -Encoding ascii SHA256SUMS-launcher-windows-msi.txt
+          Get-ChildItem *.msi
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            openspace-launcher-*-windows-x64.msi
+            SHA256SUMS-launcher-windows-msi.txt
