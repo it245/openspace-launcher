@@ -1,42 +1,58 @@
-name: Release
+name: release
+
+# Self-contained OpenSpace launcher release: builds the macOS (Apple Silicon)
+# and Windows artifacts and publishes them on a v* tag. Unsigned: macOS is
+# ad-hoc signed (Gatekeeper needs right-click > Open the first time), Windows
+# is a portable zip. No external (storytold) reusable workflows or secrets.
 
 on:
   push:
-    branches: [release]
-  workflow_dispatch:
-    inputs:
-      version:
-        description: "Version override for a test run, e.g. 0.2.0-rc.1 (empty: Cargo.toml)"
-        type: string
-        default: ""
+    tags: ["v*"]
 
 permissions:
   contents: write
 
-concurrency:
-  group: release-${{ github.ref }}
-  cancel-in-progress: false
-
 jobs:
-  release:
-    # Intentionally tracked at @main (not SHA-pinned) so org-wide CI improvements, security fixes, and build optimizations propagate without PR churn across all craftapp repos.
-    uses: storytold/craft-common-actions/.github/workflows/release.yml@main
-    with:
-      app-name: craft-launcher
-      app-title: ArtCraft Launcher
-      version: ${{ inputs.version }}
-    secrets:
-      APPLE_CERTIFICATE: ${{ secrets.APPLE_CERTIFICATE }}
-      APPLE_CERTIFICATE_PASSWORD: ${{ secrets.APPLE_CERTIFICATE_PASSWORD }}
-      KEYCHAIN_PASSWORD: ${{ secrets.KEYCHAIN_PASSWORD }}
-      APPLE_ID: ${{ secrets.APPLE_ID }}
-      APPLE_PASSWORD: ${{ secrets.APPLE_PASSWORD }}
-      APPLE_TEAM_ID: ${{ secrets.APPLE_TEAM_ID }}
-      WINDOWS_CERTIFICATE: ${{ secrets.WINDOWS_CERTIFICATE }}
-      WINDOWS_CERTIFICATE_PASSWORD: ${{ secrets.WINDOWS_CERTIFICATE_PASSWORD }}
-      AZURE_TENANT_ID: ${{ secrets.AZURE_TENANT_ID }}
-      AZURE_CLIENT_ID: ${{ secrets.AZURE_CLIENT_ID }}
-      AZURE_CLIENT_SECRET: ${{ secrets.AZURE_CLIENT_SECRET }}
-      AZURE_SIGNING_ENDPOINT: ${{ secrets.AZURE_SIGNING_ENDPOINT }}
-      AZURE_SIGNING_ACCOUNT: ${{ secrets.AZURE_SIGNING_ACCOUNT }}
-      AZURE_CERT_PROFILE: ${{ secrets.AZURE_CERT_PROFILE }}
+  macos:
+    runs-on: macos-14
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+        with:
+          targets: aarch64-apple-darwin
+      - name: Build + package (ad-hoc, unsigned)
+        run: bash packaging/macos/package.sh --arch aarch64
+      - name: Collect dmg
+        run: |
+          v=$(grep -m1 '^version' Cargo.toml | cut -d'"' -f2)
+          src=$(ls dist/*macos-aarch64.dmg 2>/dev/null || ls target/*/dist/*macos-aarch64.dmg 2>/dev/null | head -1)
+          out="openspace-launcher-$v-macos-arm64.dmg"
+          cp "$src" "$out"
+          shasum -a 256 "$out" > SHA256SUMS-launcher-macos.txt
+          ls -la "$out"
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            openspace-launcher-*-macos-arm64.dmg
+            SHA256SUMS-launcher-macos.txt
+
+  windows:
+    runs-on: windows-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: dtolnay/rust-toolchain@stable
+      - name: Build
+        run: cargo build --release --locked -p artcraft-launcher
+      - name: Portable zip
+        shell: pwsh
+        run: |
+          $v = (Select-String -Path Cargo.toml -Pattern '^version = "(.*)"' | Select-Object -First 1).Matches[0].Groups[1].Value
+          $out = "openspace-launcher-$v-windows-x64-portable.zip"
+          Compress-Archive -Path target/release/artcraft-launcher.exe -DestinationPath $out
+          ((Get-FileHash $out -Algorithm SHA256).Hash.ToLower() + "  " + $out) | Out-File -Encoding ascii SHA256SUMS-launcher-windows.txt
+          Get-ChildItem $out
+      - uses: softprops/action-gh-release@v2
+        with:
+          files: |
+            openspace-launcher-*-windows-x64-portable.zip
+            SHA256SUMS-launcher-windows.txt
