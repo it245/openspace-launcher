@@ -16,7 +16,7 @@ jobs:
   macos:
     runs-on: macos-14
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
         with:
           targets: aarch64-apple-darwin
@@ -30,7 +30,7 @@ jobs:
           cp "$src" "$out"
           shasum -a 256 "$out" > SHA256SUMS-launcher-macos.txt
           ls -la "$out"
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: |
             openspace-launcher-*-macos-arm64.dmg
@@ -39,7 +39,7 @@ jobs:
   windows-zip:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Build
         run: cargo build --release --locked -p artcraft-launcher
@@ -51,7 +51,7 @@ jobs:
           Compress-Archive -Path target/release/artcraft-launcher.exe -DestinationPath $out
           ((Get-FileHash $out -Algorithm SHA256).Hash.ToLower() + "  " + $out) | Out-File -Encoding ascii SHA256SUMS-launcher-windows-zip.txt
           Get-ChildItem $out
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: |
             openspace-launcher-*-windows-x64-portable.zip
@@ -60,7 +60,7 @@ jobs:
   windows-msi:
     runs-on: windows-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@v7
       - uses: dtolnay/rust-toolchain@stable
       - name: Install WiX v5
         shell: pwsh
@@ -79,7 +79,7 @@ jobs:
           Copy-Item $msi.FullName "openspace-launcher-$v-windows-x64.msi"
           ((Get-FileHash "openspace-launcher-$v-windows-x64.msi" -Algorithm SHA256).Hash.ToLower() + "  openspace-launcher-$v-windows-x64.msi") | Out-File -Encoding ascii SHA256SUMS-launcher-windows-msi.txt
           Get-ChildItem *.msi
-      - uses: softprops/action-gh-release@v2
+      - uses: softprops/action-gh-release@v3
         with:
           files: |
             openspace-launcher-*-windows-x64.msi
